@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.dbService.name }}
+  labels:
+    {{- include "shellbin.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.dbService.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "shellbin.server.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "shellbin.server.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "shellbin.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Values.dbService.name}}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.dbService.image.repository }}:{{ .Values.dbService.image.tag | default "latest" }}"
+          imagePullPolicy: {{ .Values.dbService.image.pullPolicy }}
+          env:
+            - name: DBUSER
+              value: {{ .Values.global.DBUSER }}
+            - name: DBPASS
+              value: {{ .Values.global.DBPASS }}
+          ports:
+            - name: 7272
+              containerPort: {{ .Values.dbService.service.port }}
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.dbService.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.dbService.name }}
+  labels:
+    {{- include "shellbin.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.dbService.service.type }}
+  ports:
+    - port: {{ .Values.dbService.service.port }}
+      targetPort: 7272
+      protocol: TCP
+      name: db-service-port
+  selector:
+    app.kubernetes.io/name: {{ .Values.dbService.name }}
