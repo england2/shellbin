@@ -2,15 +2,13 @@ package main
 
 import (
 	"bytes"
-	"crypto/md5"
-	"encoding/hex"
 	"encoding/json"
+	"fmt"
+	"io"
 	"io/ioutil"
-	"log"
+	"net"
 	"net/http"
 	"os"
-
-	"github.com/gin-gonic/gin"
 )
 
 var dbServiceAddr string
@@ -25,28 +23,37 @@ func init() {
 
 func main() {
 
-	router := gin.Default()
+	listener, err := net.Listen("tcp", "localhost:8080")
+	if err != nil {
+		// handle error
+	}
+	for {
+		conn, err := listener.Accept()
+		fmt.Println("got connection")
+		if err != nil {
+		}
+		go handleConnection(conn)
+	}
 
-	router.POST("/handleUpload", handleUpload)
+}
 
-	router.Run("localhost:6262")
+func handleConnection(conn net.Conn) {
+	readBuf := make([]byte, 65536)
+	conn.Read(readBuf)
+	fmt.Println(string(readBuf))
+
 }
 
 type jsonStruct struct {
 	FIELD string `json:"field"`
 }
 
-func handleUpload(c *gin.Context) {
-
-	var incomingJson jsonStruct
-	if err := c.BindJSON(&incomingJson); err != nil {
-		log.Fatalf("%v\n", err)
+func processClient(conn net.Conn) {
+	_, err := io.Copy(os.Stdout, conn)
+	if err != nil {
+		fmt.Println(err)
 	}
-
-	c.IndentedJSON(200, jsonStruct{
-		FIELD: getMD5Hash(incomingJson.FIELD),
-	})
-
+	conn.Close()
 }
 
 func callDatabase(input string) (string, error) {
@@ -56,7 +63,7 @@ func callDatabase(input string) (string, error) {
 	})
 
 	postBuffer := bytes.NewBuffer(postBody)
-	url := dbServiceAddr + "/dbCallTool"
+	url := dbServiceAddr + "/handleUpload"
 	resp, err := http.Post(url, "application/json", postBuffer)
 	panicErr(err)
 
@@ -68,12 +75,6 @@ func callDatabase(input string) (string, error) {
 	json.Unmarshal(body, &binLink)
 
 	return binLink.FIELD, nil
-}
-
-// simulates the db return
-func getMD5Hash(text string) string {
-	hash := md5.Sum([]byte(text))
-	return hex.EncodeToString(hash[:])
 }
 
 func panicErr(e error) {

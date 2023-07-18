@@ -29,7 +29,7 @@ dbService:
     # If not set and create is true, a name is generated using the fullname template
     name: ""
 
-toolServer:
+ncServer:
   replicaCount: 1
   name: toolserver
   image:

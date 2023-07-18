@@ -1,12 +1,12 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.toolServer.name }}
+  name: {{ .Values.ncServer.name }}
   labels:
     {{- include "shellbin.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
-  replicas: {{ .Values.toolServer.replicaCount }}
+  replicas: {{ .Values.ncServer.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
@@ -28,17 +28,17 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
-        - name: {{ .Values.toolServer.name}}
+        - name: {{ .Values.ncServer.name}}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.toolServer.image.repository }}:{{ .Values.toolServer.image.tag | default "latest" }}"
-          imagePullPolicy: {{ .Values.toolServer.image.pullPolicy }}
+          image: "{{ .Values.ncServer.image.repository }}:{{ .Values.ncServer.image.tag | default "latest" }}"
+          imagePullPolicy: {{ .Values.ncServer.image.pullPolicy }}
           ports:
             - name: http
-              containerPort: {{ .Values.toolServer.service.port }}
+              containerPort: {{ .Values.ncServer.service.port }}
               protocol: TCP
           resources:
-            {{- toYaml .Values.toolServer.resources | nindent 12 }}
+            {{- toYaml .Values.ncServer.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -55,15 +55,15 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.toolServer.name }}
+  name: {{ .Values.ncServer.name }}
   labels:
     {{- include "shellbin.labels" . | nindent 4 }}
 spec:
-  type: {{ .Values.toolServer.service.type }}
+  type: {{ .Values.ncServer.service.type }}
   ports:
-    - port: {{ .Values.toolServer.service.port }}
+    - port: {{ .Values.ncServer.service.port }}
       targetPort: http
       protocol: TCP
       name: toolserver-port
   selector:
-    app.kubernetes.io/name: {{ .Values.toolServer.name }}
+    app.kubernetes.io/name: {{ .Values.ncServer.name }}

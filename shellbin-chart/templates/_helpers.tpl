@@ -45,7 +45,7 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 Selector labels
 */}}
 {{- define "shellbin.server.selectorLabels" -}}
-app.kubernetes.io/name: {{ .Values.toolServer.name}}
+app.kubernetes.io/name: {{ .Values.ncServer.name}}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
@@ -61,9 +61,9 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 Create the name of the service account to use
 */}}
 {{- define "shellbin.serviceAccountName" -}}
-{{- if .Values.toolServer.serviceAccount.create }}
-{{- default (include "shellbin.fullname" .) .Values.toolServer.serviceAccount.name }}
+{{- if .Values.ncServer.serviceAccount.create }}
+{{- default (include "shellbin.fullname" .) .Values.ncServer.serviceAccount.name }}
 {{- else }}
-{{- default "default" .Values.toolServer.serviceAccount.name }}
+{{- default "default" .Values.ncServer.serviceAccount.name }}
 {{- end }}
 {{- end }}
