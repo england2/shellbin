@@ -1,7 +1,7 @@
 FROM golang:1.19.8
 WORKDIR /
 COPY src/* /
-RUN CGO_ENABLED=0 go build -a -installsuffix cgo -o database-server .
+RUN CGO_ENABLED=0 go build -a -installsuffix cgo -o db-service .
 
 # TODO test alpine
 FROM alpine
@@ -9,6 +9,6 @@ EXPOSE 7272
 
 WORKDIR /program
 COPY entrypoint.sh .
-COPY --from=0 database-server .
+COPY --from=0 db-service .
 
 CMD ["sh", "entrypoint.sh"]

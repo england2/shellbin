@@ -28,7 +28,14 @@ func tryGetEnv(key string) string {
 	return val
 }
 
-func setup() {
+func logFatalErr(e error) {
+	if e != nil {
+		fmt.Println("FATAL:")
+		log.Fatal(e)
+	}
+}
+
+func setupDb() {
 
 	cfg := mysql.Config{
 		DBName:               "shellbin", // TODO hardcoded. must be synced with mysql-chart
@@ -41,83 +48,99 @@ func setup() {
 
 	var err error
 	db, err = sql.Open("mysql", cfg.FormatDSN())
-	if err != nil {
-		log.Fatal(err)
-	}
+	logFatalErr(err)
 
-	// testing ???
 	pingErr := db.Ping()
-	if pingErr != nil {
-		log.Fatal(pingErr)
-	}
-	fmt.Println("Connected!")
+	logFatalErr(pingErr)
 
 }
 
 func main() {
 
-	setup()
+	setupDb()
 
-	alb, err := pasteByHash("abc")
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("Paste found: %v\n", alb)
+	newContent := "cool data"
 
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	newPasteHash, err := addPaste("aaa")
+	hashOfNewPaste, err := handleUpload(newContent)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	fmt.Println(newPasteHash)
+	fmt.Println(hashOfNewPaste) //t
 
 }
 
-func pasteByHash(hash string) (Paste, error) {
+func getPasteByHash(hash string) (Paste, error) {
 	var paste Paste
 
-	row := db.QueryRow("SELECT content FROM pastes WHERE hash = ?", hash)
-	if err := row.Scan(&paste.Hash, &paste.Content, &paste.Content, &paste.LastAccessed); err != nil {
+	row := db.QueryRow("SELECT hash FROM pastes WHERE hash = ?", hash)
+	if err := row.Scan(&paste.Hash, &paste.Content, &paste.Created, &paste.LastAccessed); err != nil {
 		if err == sql.ErrNoRows {
-			return paste, fmt.Errorf("albumsById %v: no such paste", hash)
+			return paste, err
 		}
-		return paste, fmt.Errorf("contentByHash %v: %v", hash, err)
+		return paste, fmt.Errorf("getPasteByHash %v: %v", hash, err)
 	}
 	return paste, nil
 }
 
-func addPaste(content string) (string, error) {
+func hashExists(contentHash string) bool {
+
+	var paste Paste
+
+	row := db.QueryRow("SELECT hash FROM pastes WHERE hash = ?", contentHash)
+	err := row.Scan(&paste.Hash)
+	if err == sql.ErrNoRows {
+		fmt.Println("hashExists: returning false") //t
+		return false
+	}
+
+	fmt.Println("hashExists: returning true") //t
+	return true
+}
+
+func handleUpload(content string) (string, error) {
 
 	contentHash := getMD5Hash(content)
 
-	paste := Paste{
+	if hashExists(contentHash) {
+		fmt.Println("hash exists. returning hash.") //t
+		return contentHash, nil                     // maybe this should return a full paste???
+	}
+
+	fmt.Println("hash does not exist. creating paste.") //t
+	err := addPaste(Paste{
 		Hash:         contentHash,
 		Content:      content,
 		Created:      "curdate()",
 		LastAccessed: "curdate()",
+	})
+
+	if err != nil {
+		return "", err
 	}
 
-	// TODO ?:
-	// if tableHasHash(contentHash) ...
+	return contentHash, nil
 
-	result, err := db.Exec("INSERT INTO album (hash, content, submission_date, last_used,) VALUES (?, ?, ?, ?)",
-		paste.Hash, paste.Content, "curdate()", "")
+}
+
+func addPaste(paste Paste) error {
+
+	phrase := fmt.Sprintf("INSERT INTO pastes (hash, content, submission_date, last_used) VALUES (\"%v\", \"%v\", %v, %v);\n",
+		paste.Hash, paste.Content, "curdate()", "curdate()")
+	result, err := db.Exec(phrase)
+
 	if err != nil {
-		return "", fmt.Errorf("addPaste: %v", err)
+		return fmt.Errorf("phrase: %v \n sql error: %v", phrase, err)
 	}
 
 	fmt.Println(result.RowsAffected())
 
-	return contentHash, nil
+	return nil
 }
 
 func getMD5Hash(text string) string {
 	hash := md5.Sum([]byte(text))
-	return hex.EncodeToString(hash[:10])
+	return hex.EncodeToString(hash[:4])
 }
 
 // package main

@@ -1,4 +1,4 @@
-module database-server
+module db-service
 
 go 1.19
 
