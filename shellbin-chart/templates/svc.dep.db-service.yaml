@@ -10,7 +10,7 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      {{- include "shellbin.server.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/name: {{ .Values.dbService.name }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -18,7 +18,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "shellbin.server.selectorLabels" . | nindent 8 }}
+      app.kubernetes.io/name: {{ .Values.dbService.name }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -34,6 +34,8 @@ spec:
           image: "{{ .Values.dbService.image.repository }}:{{ .Values.dbService.image.tag | default "latest" }}"
           imagePullPolicy: {{ .Values.dbService.image.pullPolicy }}
           env:
+            - name: DBADDR
+              value: {{ .Values.global.DBADDR }}
             - name: DBUSER
               value: {{ .Values.global.DBUSER }}
             - name: DBPASS

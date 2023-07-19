@@ -10,7 +10,7 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      {{- include "shellbin.server.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/name: {{ .Values.ncServer.name }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -18,7 +18,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "shellbin.server.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/name: {{ .Values.ncServer.name }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -62,8 +62,8 @@ spec:
   type: {{ .Values.ncServer.service.type }}
   ports:
     - port: {{ .Values.ncServer.service.port }}
-      targetPort: http
+      targetPort: 6262
       protocol: TCP
-      name: toolserver-port
+      name: ncserver-port
   selector:
     app.kubernetes.io/name: {{ .Values.ncServer.name }}

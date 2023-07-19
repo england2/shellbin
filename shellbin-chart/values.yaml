@@ -1,7 +1,9 @@
 global:
-  DBADDR: mysql-clean.default.svc.cluster.local
-  DBUSER: root
-  DBPASS: root
+  databaseName: mysql
+  # TODO uses namespace
+  DBADDR: mysql.default.svc.cluster.local
+  DBUSER: weak
+  DBPASS: drainage
 
 # config for database micro service
 dbService:
@@ -31,9 +33,9 @@ dbService:
 
 ncServer:
   replicaCount: 1
-  name: toolserver
+  name: ncServer
   image:
-    repository: toolserver
+    repository: ncServer
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
