@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.dbService.name }}
+  name: {{ .Values.dbservice.name }}
   labels:
-    {{- include "shellbin.labels" . | nindent 4 }}
+    app: {{ .Values.dbservice.name }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
-  replicas: {{ .Values.dbService.replicaCount }}
+  replicas: {{ .Values.dbservice.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ .Values.dbService.name }}
+      app: {{ .Values.dbservice.name }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -18,7 +18,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-      app.kubernetes.io/name: {{ .Values.dbService.name }}
+        app: {{ .Values.dbservice.name }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -28,11 +28,11 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
-        - name: {{ .Values.dbService.name}}
+        - name: {{ .Values.dbservice.name}}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.dbService.image.repository }}:{{ .Values.dbService.image.tag | default "latest" }}"
-          imagePullPolicy: {{ .Values.dbService.image.pullPolicy }}
+          image: " {{ .Values.global.registryUrl }}/{{ .Values.dbservice.image.repository }}:{{ .Values.dbservice.image.tag | default "latest" }}"
+          imagePullPolicy: {{ .Values.dbservice.image.pullPolicy }}
           env:
             - name: DBADDR
               value: {{ .Values.global.DBADDR }}
@@ -41,11 +41,11 @@ spec:
             - name: DBPASS
               value: {{ .Values.global.DBPASS }}
           ports:
-            - name: 7272
-              containerPort: {{ .Values.dbService.service.port }}
+            - name: internal-port
+              containerPort: {{ .Values.dbservice.service.port }}
               protocol: TCP
           resources:
-            {{- toYaml .Values.dbService.resources | nindent 12 }}
+            {{- toYaml .Values.dbservice.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -62,15 +62,15 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.dbService.name }}
+  name: {{ .Values.dbservice.name }}
   labels:
     {{- include "shellbin.labels" . | nindent 4 }}
 spec:
-  type: {{ .Values.dbService.service.type }}
+  type: {{ .Values.dbservice.service.type }}
   ports:
-    - port: {{ .Values.dbService.service.port }}
+    - port: {{ .Values.dbservice.service.port }}
       targetPort: 7272
       protocol: TCP
       name: db-service-port
   selector:
-    app.kubernetes.io/name: {{ .Values.dbService.name }}
+    app.kubernetes.io/name: {{ .Values.dbservice.name }}

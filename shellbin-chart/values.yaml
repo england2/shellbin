@@ -4,9 +4,10 @@ global:
   DBADDR: mysql.default.svc.cluster.local
   DBUSER: weak
   DBPASS: drainage
+  registryUrl: "localhost:5000"
 
 # config for database micro service
-dbService:
+dbservice:
   replicaCount: 1
   name: db-service
   image:
@@ -31,11 +32,11 @@ dbService:
     # If not set and create is true, a name is generated using the fullname template
     name: ""
 
-ncServer:
+ncserver:
   replicaCount: 1
-  name: ncServer
+  name: ncserver
   image:
-    repository: ncServer
+    repository: ncserver
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
