@@ -1,10 +1,10 @@
 global:
   databaseName: mysql
-  # TODO uses namespace
   DBADDR: mysql.default.svc.cluster.local
   DBUSER: weak
   DBPASS: drainage
   registryUrl: "localhost:5000"
+  imagePullSecret: regcred
 
 # config for database micro service
 dbservice:
@@ -16,7 +16,6 @@ dbservice:
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
-  env:
 
   resources: {}
   service:
@@ -55,7 +54,7 @@ ncserver:
     # If not set and create is true, a name is generated using the fullname template
     name: ""
 
-imagePullSecrets: []
+imagePullSecrets: [regcred]
 nameOverride: ""
 fullnameOverride: ""
 
