@@ -1,3 +1,3 @@
 #!/bin/sh
 cd /program/
-./ncServer
+./ncserver

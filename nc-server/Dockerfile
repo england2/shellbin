@@ -1,7 +1,8 @@
 FROM golang:1.19.8
 WORKDIR /
 COPY src/* /
-RUN CGO_ENABLED=0 go build -a -installsuffix cgo -o ncServer .
+RUN go mod tidy
+RUN CGO_ENABLED=0 go build -a -installsuffix cgo -o ncserver .
 
 # TODO test alpine
 FROM alpine
@@ -9,6 +10,6 @@ EXPOSE 6262
 
 WORKDIR /program
 COPY entrypoint.sh .
-COPY --from=0 server .
+COPY --from=0 ncserver .
 
 CMD ["sh", "entrypoint.sh"]
