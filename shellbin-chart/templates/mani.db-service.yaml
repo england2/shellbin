@@ -4,8 +4,7 @@ metadata:
   name: {{ .Values.dbservice.name }}
   labels:
     app: {{ .Values.dbservice.name }}
-  # annotations:
-  #         rollme: {{ randAlphaNum 5 | quote }}
+    date: "{{ now | unixEpoch }}"
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.dbservice.replicaCount }}
@@ -24,15 +23,19 @@ spec:
     spec:
       imagePullSecrets:
         - name: {{ .Values.global.imagePullSecret }}
-      serviceAccountName: {{ include "shellbin.serviceAccountName" . }}
+      # serviceAccountName: {{ include "shellbin.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ .Values.dbservice.name}}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: " {{ .Values.global.registryUrl }}/{{ .Values.dbservice.image.repository }}:{{ .Values.dbservice.image.tag | default "latest" }}"
+          image: "{{ .Values.global.registryUrl }}/{{ .Values.dbservice.image.repository }}:{{ .Values.dbservice.image.tag | default "latest" }}"
           imagePullPolicy: {{ .Values.dbservice.image.pullPolicy }}
+          command: ["sleep"]
+          args: ["infinity"]
+          # command: ["sh"]
+          # args: ["entrypoint.sh"]
           env:
             - name: DBADDR
               value: {{ .Values.global.DBADDR }}
@@ -73,4 +76,4 @@ spec:
       protocol: TCP
       name: db-service-port
   selector:
-    app.kubernetes.io/name: {{ .Values.dbservice.name }}
+    app: {{ .Values.dbservice.name }}
