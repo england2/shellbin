@@ -66,4 +66,4 @@ spec:
       protocol: TCP
       name: ncserver-port
   selector:
-    app.kubernetes.io/name: {{ .Values.ncserver.name }}
+    app: {{ .Values.ncserver.name }}

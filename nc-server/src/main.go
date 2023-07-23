@@ -9,72 +9,86 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"time"
 )
 
-var dbServiceAddr string
+var dbserviceAddr string
 
+// crash if db-service is not responding or env var DBSERVICEADDR is empty
 func init() {
-	var hasDbServiceAddrEnv bool
-	dbServiceAddr, hasDbServiceAddrEnv = os.LookupEnv("DBSERVICEADDR")
-	if !hasDbServiceAddrEnv {
-		panic("Env var DBSERVICEADDR is not set")
-	}
+	time.Sleep(time.Second * 4)
+
+	dbserviceAddr = os.Getenv("DBSERVICEADDR")
+	_, err := callDbService("")
+	panicErr(err)
 }
 
 func main() {
+	url := "127.0.0.1:6262"
+	listener, err := net.Listen("tcp", url)
+	panicErr(err)
+	fmt.Printf("listening on %v\n", url)
 
-	listener, err := net.Listen("tcp", "localhost:8080")
-	if err != nil {
-		// handle error
-	}
 	for {
 		conn, err := listener.Accept()
-		fmt.Println("got connection")
 		if err != nil {
+			fmt.Println(err)
 		}
-		go handleConnection(conn)
+		go processClient(conn)
 	}
-
 }
 
-func handleConnection(conn net.Conn) {
-	readBuf := make([]byte, 65536)
-	conn.Read(readBuf)
-	fmt.Println(string(readBuf))
-
-}
-
-type jsonStruct struct {
-	FIELD string `json:"field"`
+type PasteJson struct {
+	Content string `json:"Content"`
+	Hash    string `json:"Hash"`
 }
 
 func processClient(conn net.Conn) {
-	_, err := io.Copy(os.Stdout, conn)
+	fmt.Printf("got connecton from %v\n", conn.RemoteAddr().String())
+	defer conn.Close()
+	buf := new(bytes.Buffer)
+	n, err := io.Copy(buf, conn)
 	if err != nil {
 		fmt.Println(err)
 	}
-	conn.Close()
+
+	if n > 1048576*2 { // 2MB
+		conn.Write([]byte("Error: content exceeds 2MB\n"))
+		conn.Close()
+		return
+	}
+
+	content := buf.String()
+
+	fmt.Println(content) //t
+
+	hash, err := callDbService(content)
+	if err == nil {
+		conn.Write([]byte(fmt.Sprintf("paste.cat-z.xyz/%v\n", hash)))
+	} else {
+		conn.Write([]byte("internal error\n"))
+	}
 }
 
-func callDatabase(input string) (string, error) {
+func callDbService(content string) (string, error) {
 
-	postBody, _ := json.Marshal(map[string]string{
-		"field": string(input),
-	})
+	values := map[string]string{"Content": content}
+	json_data, err := json.Marshal(values)
+	panicErr(err)
 
-	postBuffer := bytes.NewBuffer(postBody)
-	url := dbServiceAddr + "/handleUpload"
-	resp, err := http.Post(url, "application/json", postBuffer)
+	resp, err := http.Post("http://"+dbserviceAddr+"/process", "application/json", bytes.NewBuffer(json_data))
 	panicErr(err)
 
 	defer resp.Body.Close()
 
-	var binLink jsonStruct
+	var jsonResp PasteJson
 	body, err := ioutil.ReadAll(resp.Body)
 	panicErr(err)
-	json.Unmarshal(body, &binLink)
+	json.Unmarshal(body, &jsonResp)
 
-	return binLink.FIELD, nil
+	fmt.Println(jsonResp)
+
+	return jsonResp.Content, nil
 }
 
 func panicErr(e error) {

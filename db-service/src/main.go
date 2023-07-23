@@ -8,16 +8,26 @@ import (
 	"log"
 	"os"
 
+	"github.com/gin-gonic/gin"
 	"github.com/go-sql-driver/mysql"
 )
 
 var db *sql.DB
 
+// can we bind json to this?
 type Paste struct {
 	Hash         string
 	Content      string
 	Created      string
 	LastAccessed string
+}
+
+// or use this instead of the above?
+type PasteJson struct {
+	Hash         string `json:"Hash"`
+	Content      string `json:"Content"`
+	Created      string `json:"Created"`
+	LastAccessed string `json:"LastAccessed"`
 }
 
 func tryGetEnv(key string) string {
@@ -38,11 +48,11 @@ func logFatalErr(e error) {
 func setupDb() {
 
 	cfg := mysql.Config{
-		DBName:               "shellbin", // TODO hardcoded. must be synced with mysql-chart
+		DBName:               "shellbin",
 		Net:                  "tcp",
+		Addr:                 tryGetEnv("DBADDR"),
 		User:                 tryGetEnv("DBUSER"),
 		Passwd:               tryGetEnv("DBPASS"),
-		Addr:                 tryGetEnv("DBSERVICEADDR"),
 		AllowNativePasswords: true,
 	}
 
@@ -59,15 +69,31 @@ func main() {
 
 	setupDb()
 
-	newContent := "cool data"
+	router := gin.Default()
+	router.POST("/process", process)
+	router.Run("0.0.0.0:7272")
 
-	hashOfNewPaste, err := handleUpload(newContent)
-	if err != nil {
-		fmt.Println(err)
+}
+
+func process(c *gin.Context) {
+
+	var incomingJson PasteJson
+	if err := c.BindJSON(&incomingJson); err != nil {
+		log.Fatalf("%v\n", err)
 	}
+	content := incomingJson.Content
+	fmt.Println(content) //t
 
-	fmt.Println(hashOfNewPaste) //t
-
+	hashToSend, err := callDb(content)
+	if err == nil {
+		c.IndentedJSON(200, PasteJson{
+			Content: hashToSend,
+		})
+	} else {
+		c.IndentedJSON(503, PasteJson{
+			Content: "server error",
+		})
+	}
 }
 
 func getPasteByHash(hash string) (Paste, error) {
@@ -98,16 +124,17 @@ func hashExists(contentHash string) bool {
 	return true
 }
 
-func handleUpload(content string) (string, error) {
+// timeout after 5 seconds, return generic error to user
+func callDb(content string) (string, error) {
 
 	contentHash := getMD5Hash(content)
 
 	if hashExists(contentHash) {
-		fmt.Println("hash exists. returning hash.") //t
-		return contentHash, nil                     // maybe this should return a full paste???
+		fmt.Println("callDb: hash exists. returning hash.") //t
+		return contentHash, nil                             // maybe this should return a full paste???
 	}
 
-	fmt.Println("hash does not exist. creating paste.") //t
+	fmt.Println("callDb: hash does not exist. creating paste.") //t
 	err := addPaste(Paste{
 		Hash:         contentHash,
 		Content:      content,
@@ -142,48 +169,3 @@ func getMD5Hash(text string) string {
 	hash := md5.Sum([]byte(text))
 	return hex.EncodeToString(hash[:4])
 }
-
-// package main
-
-// import (
-// 	"crypto/md5"
-// 	"encoding/hex"
-// 	"log"
-
-// 	"github.com/gin-gonic/gin"
-// )
-
-// func main() {
-
-// 	router := gin.Default()
-
-// 	router.POST("/upload", upload)
-
-// 	router.Run("localhost:7272")
-// }
-
-// type jsonStruct struct {
-// 	FIELD string `json:"field"`
-// }
-
-// func upload(c *gin.Context) {
-
-// 	var incomingJson jsonStruct
-// 	if err := c.BindJSON(&incomingJson); err != nil {
-// 		log.Fatalf("%v\n", err)
-// 	}
-// 	content := incomingJson.FIELD
-
-// 	var hashToSend string
-
-// 	if dbHasContent(content) {
-// 		hashToSend = getMD5Hash(content)
-// 	} else {
-// 		dbNewEntry(content)
-// 	}
-
-// 	c.IndentedJSON(200, jsonStruct{
-// 		FIELD: hashToSend,
-// 	})
-
-// }
