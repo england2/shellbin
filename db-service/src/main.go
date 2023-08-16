@@ -70,21 +70,47 @@ func main() {
 	setupDb()
 
 	router := gin.Default()
-	router.POST("/process", process)
+	router.POST("/processInput", processInput)
+	router.POST("/servePaste", servePaste)
 	router.Run("0.0.0.0:7272")
 
 }
 
-func process(c *gin.Context) {
+func servePaste(c *gin.Context) {
 
 	var incomingJson PasteJson
 	if err := c.BindJSON(&incomingJson); err != nil {
-		log.Fatalf("%v\n", err)
+		log.Printf("%v\n", err)
+	}
+	hash := incomingJson.Hash
+
+	fmt.Printf("(in servePaste) hash: %v|\n", hash) //t
+
+	paste, err := getPasteByHash(hash)
+	fmt.Printf("paste: %v\n", paste) //t
+
+	if err == nil {
+		c.IndentedJSON(200, paste)
+	} else {
+		fmt.Println(err) //t
+		c.IndentedJSON(404, PasteJson{
+			Content: "server error",
+		})
+	}
+
+}
+
+// POST endpoint receiving paste content. writes content of paste to the database
+func processInput(c *gin.Context) {
+
+	var incomingJson PasteJson
+	if err := c.BindJSON(&incomingJson); err != nil {
+		log.Printf("%v\n", err)
 	}
 	content := incomingJson.Content
 	fmt.Println(content) //t
 
-	hashToSend, err := callDb(content)
+	hashToSend, err := insertPaste(content)
 	if err == nil {
 		c.IndentedJSON(200, PasteJson{
 			Content: hashToSend,
@@ -97,15 +123,17 @@ func process(c *gin.Context) {
 }
 
 func getPasteByHash(hash string) (Paste, error) {
+
 	var paste Paste
 
-	row := db.QueryRow("SELECT hash FROM pastes WHERE hash = ?", hash)
+	row := db.QueryRow("SELECT * FROM pastes WHERE hash = ?", hash)
 	if err := row.Scan(&paste.Hash, &paste.Content, &paste.Created, &paste.LastAccessed); err != nil {
 		if err == sql.ErrNoRows {
 			return paste, err
 		}
-		return paste, fmt.Errorf("getPasteByHash %v: %v", hash, err)
+		return paste, fmt.Errorf("getPasteByHash: %v", err)
 	}
+
 	return paste, nil
 }
 
@@ -125,7 +153,7 @@ func hashExists(contentHash string) bool {
 }
 
 // timeout after 5 seconds, return generic error to user
-func callDb(content string) (string, error) {
+func insertPaste(content string) (string, error) {
 
 	contentHash := getMD5Hash(content)
 
