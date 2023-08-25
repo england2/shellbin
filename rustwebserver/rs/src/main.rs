@@ -27,18 +27,14 @@ async fn hello(req: HttpRequest, session: Session) -> impl Responder {
 // this function to be called asynchronously (?)
 async fn get_paste(req: HttpRequest, session: Session) -> Result<HttpResponse> {
     let path = req.path();
-   
-    println!("{path:?}"); //tk
 
-    
-    //TODO? refactor http get to reusable function
-    // is this async?? I want this to block
+    println!("{path:?}"); //t
+
     let resp = match reqwest::get("https://httpbin.org/ip").await {
         Ok(resp) => resp.text().await.unwrap(),
-        Err(err) => panic!("Error: {}", err)
+        Err(err) => panic!("Error: {}", err),
     };
     println!("{}", resp);
-    
 
     let body = format!("{}", path);
 
