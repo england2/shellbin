@@ -1,21 +1,14 @@
-use actix_files::{Files, NamedFile};
-use actix_session::{storage::SessionStore, Session, SessionMiddleware};
+use actix_session::Session;
 use actix_web::{
-    error, get,
-    http::{
-        header::{self, ContentType},
-        Method, StatusCode,
-    },
-    middleware, post,
-    web::{self, post},
-    App, Either, HttpRequest, HttpResponse, HttpServer, Responder, ResponseError, Result,
+    http::{header::ContentType, StatusCode},
+    post,
+    web::{self},
+    App, HttpRequest, HttpResponse, HttpServer, Responder, Result,
 };
-use awc::Client;
-use derive_more::{Display, Error};
-use reqwest::Response;
-use serde::{Deserialize, Serialize};
+
+use serde::Deserialize;
 use std::env;
-use url::Url;
+
 #[macro_use]
 extern crate lazy_static;
 
@@ -36,7 +29,7 @@ struct Paste {
 }
 
 // TODO frontend
-async fn index(req: HttpRequest, session: Session) -> impl Responder {
+async fn index(_req: HttpRequest, _session: Session) -> impl Responder {
     HttpResponse::Ok().body("Shellbin")
 }
 

@@ -1,19 +1,35 @@
 global:
   databaseName: mysql
-  DBADDR: mysql.default.svc.cluster.local
   DBUSER: weak
   DBPASS: drainage
+  # HARDCODED
+  DBADDR: shellbin-mysql.shellbin.svc.cluster.local
+  # HARDCODED:
+  DBSERVICEADDR: db-service.shellbin.svc.cluster.local
   registryUrl: "localhost:5000"
   imagePullSecret: regcred
 
-# config for database micro service
+rustwebserver:
+  replicaCount: 1
+  name: rustwebserver
+  image:
+    repository: rustwebserver
+    pullPolicy: Always
+    tag: ""
+
+  service:
+    type: ClusterIP
+    port: 4747
+      
+    
 dbservice:
   replicaCount: 1
   name: db-service
   image:
     # TODO use template within template to get repo name
-    repository: db-service
-    pullPolicy: IfNotPresent
+    # TODO where is there an A at the end of this?
+    repository: db-servicea
+    pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
 
@@ -35,15 +51,15 @@ ncserver:
   replicaCount: 1
   name: ncserver
   image:
-    repository: ncserver
-    pullPolicy: IfNotPresent
+    repository: ncservera
+    pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
 
   resources: {}
   service:
     type: ClusterIP
-    port: 6262
+    port: 7
 
   serviceAccount:
     # Specifies whether a service account should be created

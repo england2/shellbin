@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-sql-driver/mysql"
@@ -72,6 +73,7 @@ func main() {
 	router := gin.Default()
 	router.POST("/processInput", processInput)
 	router.POST("/servePaste", servePaste)
+	// TODO helm env vars for port
 	router.Run("0.0.0.0:7272")
 
 }
@@ -84,18 +86,26 @@ func servePaste(c *gin.Context) {
 	}
 	hash := incomingJson.Hash
 
-	fmt.Printf("(in servePaste) hash: %v|\n", hash) //t
+	// TODO make go awk helper library and use it here:
+	//  hash := incomingJson.Hash.goawkHelper("'/hash/' { gsub("/"",""); print $2 }")
+	hashArr := strings.Split(hash, "")
+	if hashArr[0] == "/" {
+		hash = strings.Join(hashArr[1:], "")
+	}
+
+	fmt.Printf("(in servePaste) hash: %v\n", hash)
 
 	paste, err := getPasteByHash(hash)
-	fmt.Printf("paste: %v\n", paste) //t
+	fmt.Printf("paste.Hash: %v\n", paste.Hash)
 
 	if err == nil {
+		fmt.Printf("(in servePaste) 200 paste found ")
+		fmt.Printf("paste: %v\n", paste)
 		c.IndentedJSON(200, paste)
 	} else {
-		fmt.Println(err) //t
-		c.IndentedJSON(404, PasteJson{
-			Content: "server error",
-		})
+		fmt.Printf("(in servePaste) 404 paste not found ")
+		fmt.Println(err)
+		c.IndentedJSON(404, PasteJson{})
 	}
 
 }
@@ -129,11 +139,16 @@ func getPasteByHash(hash string) (Paste, error) {
 	row := db.QueryRow("SELECT * FROM pastes WHERE hash = ?", hash)
 	if err := row.Scan(&paste.Hash, &paste.Content, &paste.Created, &paste.LastAccessed); err != nil {
 		if err == sql.ErrNoRows {
+			// expected error
 			return paste, err
+		} else {
+			// unexpected error
+			fmt.Println(err)
+			return paste, fmt.Errorf("getPasteByHash: %v", err)
 		}
-		return paste, fmt.Errorf("getPasteByHash: %v", err)
 	}
 
+	fmt.Println("returning paste", paste) //t
 	return paste, nil
 }
 

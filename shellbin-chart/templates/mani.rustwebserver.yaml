@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.rustwebserver.name }}
+  labels:
+    app: {{ .Values.rustwebserver.name }}
+    date: "{{ now | unixEpoch }}"
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.rustwebserver.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app: {{ .Values.rustwebserver.name }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        app: {{ .Values.rustwebserver.name }}
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.global.imagePullSecret }}
+      # serviceAccountName: {{ include "shellbin.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Values.rustwebserver.name}}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.global.registryUrl }}/{{ .Values.rustwebserver.image.repository }}:{{ .Values.rustwebserver.image.tag | default "latest" }}"
+          imagePullPolicy: {{ .Values.rustwebserver.image.pullPolicy }}
+          command: ["sleep"]
+          args: ["infinity"]
+          # command: ["sh"]
+          # args: ["entrypoint.sh"]
+          env:
+            - name: HOSTADDR
+              value: 0.0.0.0:{{ .Values.rustwebserver.service.port  }}
+            - name: DBSERVICEADDR
+              value: {{ .Values.global.DBSERVICEADDR }}
+          ports:
+            - name: internal-port
+              containerPort: {{ .Values.rustwebserver.service.port }}
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.rustwebserver.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.rustwebserver.name }}
+  labels:
+    {{- include "shellbin.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.rustwebserver.service.type }}
+  ports:
+    # HARDCODED
+    - port: 80
+      targetPort: 4747
+      protocol: TCP
+      name: rustwebserver
+  selector:
+    app: {{ .Values.rustwebserver.name }}
