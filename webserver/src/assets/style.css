@@ -1,0 +1,102 @@
+@font-face {
+  font-family: "Ubuntu Mono";
+  src: url("UbuntuMono-Regular.woff2") format("woff2"),
+    url("UbuntuMono-Regular.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Ubuntu";
+  src: url("Ubuntu-Regular.woff2") format("woff2"),
+    url("Ubuntu-Regular.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+::selection {
+  color: #bdcccc;
+  background: #165a54ca;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  color: #93a1a1;
+}
+
+.submitbutton {
+  font-family: "Ubuntu Mono";
+  background: rgb(0, 43, 54);
+  border: 0.001em;
+  color: #93a1a1;
+  border: 0.001rem solid;
+  border-color: #657b8346;
+  border-radius: 0em;
+  box-shadow: 0.2em 0.2em 0em rgba(0, 24, 30, 0.506);
+}
+
+.p1 {
+  font-family: Ubuntu;
+  color: #6a7676b2;
+}
+
+.body1 {
+  background-color: rgb(0, 37, 46);
+  display: flexbox;
+  height: 300px; /* Or whatever */
+}
+
+.mono1 {
+  word-wrap: break-word;
+  font-family: "Ubuntu Mono", monospace;
+  /* font-size: 160%; */
+}
+
+.aside1 {
+  word-wrap: break-word;
+  background: rgb(0, 43, 54);
+  margin: 2% auto;
+
+  /* top | right | bottom | left */
+  padding: 0 1% -0% 1%;
+  padding: 0em;
+  width: 93%;
+  border: 0.001rem solid;
+  border-color: #657b8346;
+  border-radius: 0em;
+  box-shadow: 0.2em 0.2em 0em rgba(0, 24, 30, 0.506);
+}
+
+.pasteInput {
+  background-color: rgb(0, 37, 46);
+}
+
+.textarea1 {
+  color: #6a7676;
+  width: 100%;
+  height: 100%;
+  border: 0.001rem solid;
+  border-color: #657b8346;
+  border-radius: 0em;
+  box-shadow: 0.2em 0.2em 0em rgba(0, 24, 30, 0.506);
+  background: rgb(0, 43, 54);
+  resize: none;
+}
+
+.textarea1:focus {
+  outline: none !important;
+  color: #93a1a1;
+  border: 0.001rem solid;
+  border-color: #657b8370;
+  border-radius: 0em;
+  box-shadow: 0.2em 0.2em 0em rgba(0, 24, 30, 0.734);
+}
+
+textarea::placeholder {
+  color: #6a7676;
+}
