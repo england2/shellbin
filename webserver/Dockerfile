@@ -1,0 +1,14 @@
+FROM golang:1.19.8
+WORKDIR /build
+COPY src/ ./
+RUN go mod tidy
+RUN CGO_ENABLED=0 go build -a -installsuffix cgo -o webserver .
+
+FROM alpine
+EXPOSE 4747
+
+WORKDIR /program
+COPY entrypoint.sh .
+COPY --from=0 /build/webserver .
+
+CMD ["sh", "entrypoint.sh"]

@@ -6,29 +6,28 @@ global:
   DBADDR: shellbin-mysql.shellbin.svc.cluster.local
   # HARDCODED:
   DBSERVICEADDR: db-service.shellbin.svc.cluster.local
-  registryUrl: "localhost:5000"
-  imagePullSecret: regcred
+  registryUrl: "docker-registry:5000"
+  imagePullSecret: reg-cred-secret
 
-rustwebserver:
+webserver:
   replicaCount: 1
-  name: rustwebserver
+  name: webserver
   image:
-    repository: rustwebserver
+    repository: webserver
     pullPolicy: Always
     tag: ""
 
   service:
     type: ClusterIP
     port: 4747
-      
-    
+
 dbservice:
   replicaCount: 1
   name: db-service
   image:
     # TODO use template within template to get repo name
     # TODO where is there an A at the end of this?
-    repository: db-servicea
+    repository: db-service
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
@@ -51,7 +50,7 @@ ncserver:
   replicaCount: 1
   name: ncserver
   image:
-    repository: ncservera
+    repository: ncserver
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""

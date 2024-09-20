@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.webserver.name }}
+  labels:
+    app: {{ .Values.webserver.name }}
+    date: "{{ now | unixEpoch }}"
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.webserver.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app: {{ .Values.webserver.name }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        app: {{ .Values.webserver.name }}
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.global.imagePullSecret }}
+      # serviceAccountName: {{ include "shellbin.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Values.webserver.name}}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.global.registryUrl }}/{{ .Values.webserver.image.repository }}:{{ .Values.webserver.image.tag | default "latest" }}"
+          imagePullPolicy: {{ .Values.webserver.image.pullPolicy }}
+          command: ["sleep"]
+          args: ["infinity"]
+          # command: ["sh"]
+          # args: ["entrypoint.sh"]
+          env:
+            - name: HOSTADDR
+              value: 0.0.0.0:{{ .Values.webserver.service.port  }}
+            - name: DBSERVICEADDR
+              value: {{ .Values.global.DBSERVICEADDR }}
+          ports:
+            - name: internal-port
+              containerPort: {{ .Values.webserver.service.port }}
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.webserver.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.webserver.name }}
+  labels:
+    {{- include "shellbin.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.webserver.service.type }}
+  ports:
+    # HARDCODED
+    - port: 80
+      targetPort: 4747
+      protocol: TCP
+      name: webserver
+  selector:
+    app: {{ .Values.webserver.name }}

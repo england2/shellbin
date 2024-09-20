@@ -4,8 +4,6 @@ metadata:
   name: {{ .Values.ncserver.name }}
   labels:
     app: {{ .Values.ncserver.name }}
-  # annotations:
-  #         rollme: {{ randAlphaNum 5 | quote }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.ncserver.replicaCount }}
@@ -33,6 +31,13 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.global.registryUrl }}/{{ .Values.ncserver.image.repository }}:{{ .Values.ncserver.image.tag | default "latest" }}"
           imagePullPolicy: {{ .Values.ncserver.image.pullPolicy }}
+          # command: ["sleep"]
+          # args: ["infinity"]
+          command: ["sh"]
+          args: ["entrypoint.sh"]
+          env:
+            - name: DBSERVICEADDR
+              value: {{ .Values.global.DBSERVICEADDR }}
           ports:
             - name: internal-port
               containerPort: {{ .Values.ncserver.service.port }}

@@ -1,5 +1,9 @@
+.gitignore
 go.work
 go.work.sum
 ghetto-ci-cd.sh
 build-push-test.sh
-asd
+update-images.sh 
+*target*
+ignore-folder
+%--*

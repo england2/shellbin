@@ -71,7 +71,8 @@ metadata:
 spec:
   type: {{ .Values.dbservice.service.type }}
   ports:
-    - port: {{ .Values.dbservice.service.port }}
+    # HARDCODED
+    - port: 80
       targetPort: 7272
       protocol: TCP
       name: db-service-port

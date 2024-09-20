@@ -15,16 +15,7 @@ import (
 
 var db *sql.DB
 
-// can we bind json to this?
 type Paste struct {
-	Hash         string
-	Content      string
-	Created      string
-	LastAccessed string
-}
-
-// or use this instead of the above?
-type PasteJson struct {
 	Hash         string `json:"Hash"`
 	Content      string `json:"Content"`
 	Created      string `json:"Created"`
@@ -37,13 +28,6 @@ func tryGetEnv(key string) string {
 		log.Panicf("env var %v is not set", key)
 	}
 	return val
-}
-
-func logFatalErr(e error) {
-	if e != nil {
-		fmt.Println("FATAL:")
-		log.Fatal(e)
-	}
 }
 
 func setupDb() {
@@ -59,40 +43,21 @@ func setupDb() {
 
 	var err error
 	db, err = sql.Open("mysql", cfg.FormatDSN())
-	logFatalErr(err)
 
-	pingErr := db.Ping()
-	logFatalErr(pingErr)
-
-}
-
-func main() {
-
-	setupDb()
-
-	router := gin.Default()
-	router.POST("/processInput", processInput)
-	router.POST("/servePaste", servePaste)
-	// TODO helm env vars for port
-	router.Run("0.0.0.0:7272")
+	if err != nil {
+		setupDb()
+	}
 
 }
 
 func servePaste(c *gin.Context) {
 
-	var incomingJson PasteJson
+	var incomingJson Paste
 	if err := c.BindJSON(&incomingJson); err != nil {
 		log.Printf("%v\n", err)
 	}
-	hash := incomingJson.Hash
 
-	// TODO make go awk helper library and use it here:
-	//  hash := incomingJson.Hash.goawkHelper("'/hash/' { gsub("/"",""); print $2 }")
-	hashArr := strings.Split(hash, "")
-	if hashArr[0] == "/" {
-		hash = strings.Join(hashArr[1:], "")
-	}
-
+	hash := strings.Replace(incomingJson.Hash, "/", "", -1)
 	fmt.Printf("(in servePaste) hash: %v\n", hash)
 
 	paste, err := getPasteByHash(hash)
@@ -105,7 +70,7 @@ func servePaste(c *gin.Context) {
 	} else {
 		fmt.Printf("(in servePaste) 404 paste not found ")
 		fmt.Println(err)
-		c.IndentedJSON(404, PasteJson{})
+		c.IndentedJSON(404, Paste{})
 	}
 
 }
@@ -113,7 +78,7 @@ func servePaste(c *gin.Context) {
 // POST endpoint receiving paste content. writes content of paste to the database
 func processInput(c *gin.Context) {
 
-	var incomingJson PasteJson
+	var incomingJson Paste
 	if err := c.BindJSON(&incomingJson); err != nil {
 		log.Printf("%v\n", err)
 	}
@@ -122,13 +87,11 @@ func processInput(c *gin.Context) {
 
 	hashToSend, err := insertPaste(content)
 	if err == nil {
-		c.IndentedJSON(200, PasteJson{
-			Content: hashToSend,
+		c.IndentedJSON(200, Paste{
+			Hash: hashToSend,
 		})
 	} else {
-		c.IndentedJSON(503, PasteJson{
-			Content: "server error",
-		})
+		c.IndentedJSON(503, Paste{})
 	}
 }
 
@@ -211,4 +174,16 @@ func addPaste(paste Paste) error {
 func getMD5Hash(text string) string {
 	hash := md5.Sum([]byte(text))
 	return hex.EncodeToString(hash[:4])
+}
+
+func main() {
+
+	setupDb()
+
+	router := gin.Default()
+	router.POST("/processInput", processInput)
+	router.POST("/servePaste", servePaste)
+	// TODO helm env vars for port
+	router.Run("0.0.0.0:7272")
+
 }

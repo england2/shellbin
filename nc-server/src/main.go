@@ -14,19 +14,21 @@ import (
 
 var dbserviceAddr string
 
-// crash if db-service is not responding or env var DBSERVICEADDR is empty
-func init() {
-	time.Sleep(time.Second * 4)
+func main() {
 
 	dbserviceAddr = os.Getenv("DBSERVICEADDR")
-	_, err := callDbService("")
-	panicErr(err)
-}
+	url := "0.0.0.0:6262"
 
-func main() {
-	url := "127.0.0.1:6262"
-	listener, err := net.Listen("tcp", url)
-	panicErr(err)
+	var listener net.Listener
+	for {
+		var err error
+		listener, err = net.Listen("tcp", url)
+		if err == nil {
+			break
+		}
+		time.Sleep(time.Second * 2)
+	}
+
 	fmt.Printf("listening on %v\n", url)
 
 	for {
@@ -59,10 +61,9 @@ func processClient(conn net.Conn) {
 	}
 
 	content := buf.String()
-
 	fmt.Println(content) //t
 
-	hash, err := callDbService(content)
+	hash, err := addContentDb(content)
 	if err == nil {
 		conn.Write([]byte(fmt.Sprintf("paste.cat-z.xyz/%v\n", hash)))
 	} else {
@@ -70,13 +71,14 @@ func processClient(conn net.Conn) {
 	}
 }
 
-func callDbService(content string) (string, error) {
+func addContentDb(content string) (string, error) {
 
 	values := map[string]string{"Content": content}
 	json_data, err := json.Marshal(values)
 	panicErr(err)
 
-	resp, err := http.Post("http://"+dbserviceAddr+"/process", "application/json", bytes.NewBuffer(json_data))
+	resp, err := http.Post("http://"+dbserviceAddr+"/processInput",
+		"application/json", bytes.NewBuffer(json_data))
 	panicErr(err)
 
 	defer resp.Body.Close()

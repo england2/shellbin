@@ -1,67 +1,116 @@
 package main
 
 import (
+	"bytes"
 	"embed"
+	"encoding/json"
 	"fmt"
 	"io/fs"
+	"io/ioutil"
 	"log"
 	"net/http"
-	"time"
+	"os"
 
 	"github.com/gin-gonic/gin"
 )
 
-func page_paste(c *gin.Context) {
-
-	fmt.Println("in page_timeNow")
-
-	path := c.Param("path")
-	c.HTML(http.StatusOK, "paste.html", gin.H{
-		"time": time.Now(),
-		"path": path,
-	})
-
-}
-
-func page_index(c *gin.Context) {
-
-	fmt.Println("in page_index")
-
-	message := c.PostForm("message")
-
-	fmt.Printf("message: %v\n", message)
-
-	c.HTML(http.StatusOK, "index.html", "")
-
-}
-
-type Paste struct {
-	Content string
-}
-
-func bookNewPostHandler(c *gin.Context) {
-
-	book := &Paste{}
-	if err := c.Bind(book); err != nil {
-		return
-	}
-
-	fmt.Println(book)
-
-	c.Redirect(http.StatusFound, "/books/")
-}
-
 //go:embed assets/*
 var fullAssets embed.FS
 
-func handleLogin(c *gin.Context) {
-	emailValue := c.PostForm("email")
-	passwordValue := c.PostForm("password")
+// helper
+func unmarshalPaste(resp http.Response) Paste {
 
-	fmt.Println(emailValue)
-	fmt.Println(passwordValue)
+	var jsonResp Paste
+	body, err := ioutil.ReadAll(resp.Body)
+	panicErr(err)
+	json.Unmarshal(body, &jsonResp)
 
-	c.Redirect(302, "/paste/"+emailValue)
+	fmt.Println(jsonResp)
+	return jsonResp
+}
+
+func routePaste(c *gin.Context) {
+
+	fmt.Println("in routePaste")
+
+	path := c.Param("path")
+
+	resp := getContentDb(path)
+
+	if resp.Status == "200" {
+
+		paste := unmarshalPaste(*resp)
+
+		c.HTML(http.StatusOK, "paste.html", gin.H{
+			"content": paste.Content,
+		})
+	} else if resp.Status == "404" {
+		c.HTML(http.StatusOK, "paste.html", "")
+	}
+
+}
+
+func routeIndex(c *gin.Context) {
+	c.HTML(http.StatusOK, "index.html", "")
+}
+
+func handleSubmit(c *gin.Context) {
+	content := c.PostForm("content")
+
+	fmt.Println(content)
+
+	resp := addContentDb(content)
+
+	if resp.Status == "200" {
+		c.Redirect(302, "/paste/"+content)
+	} else if resp.Status == "504" {
+		fmt.Println("db service down")
+		c.HTML(http.StatusBadRequest, "erorr.html", "")
+	}
+}
+
+func addContentDb(content string) *http.Response {
+
+	json_data, err := json.Marshal(map[string]string{
+		"Content": content})
+	panicErr(err)
+
+	resp, err := http.Post("http://"+dbserviceAddr+"/processInput",
+		"application/json", bytes.NewBuffer(json_data))
+
+	if err != nil {
+		return &http.Response{
+			Status: "504",
+		}
+	}
+
+	defer resp.Body.Close()
+
+	return resp
+
+}
+
+func getContentDb(hash string) *http.Response {
+
+	json_data, err := json.Marshal(map[string]string{
+		"Hash": hash})
+	panicErr(err)
+
+	resp, err := http.Post("http://"+dbserviceAddr+"/servePaste",
+		"application/json", bytes.NewBuffer(json_data))
+	// TODO recover from this error, reoute to page 404
+	panicErr(err)
+
+	defer resp.Body.Close()
+
+	return resp
+}
+
+type Paste struct {
+	Hash         string `json:"Hash"`
+	Content      string `json:"Content"`
+	Created      string `json:"Created"`
+	LastAccessed string `json:"LastAccessed"`
 }
 
 func startServer() {
@@ -78,20 +127,28 @@ func startServer() {
 	router.StaticFS("/assets", http.FS(assets))
 
 	g1 := router.Group("/")
-	g1.GET("/paste/:path", page_paste)
+	g1.GET("/paste/:path", routePaste)
 
-	g1.GET("/", page_index)
+	g1.GET("/", routeIndex)
 
-	router.POST("/login", handleLogin)
+	router.POST("/submit", handleSubmit)
 
-	router.Run(":8080")
+	router.Run(hostAddr)
 
 }
 
+var dbserviceAddr string
+var hostAddr string
+
 func main() {
+	dbserviceAddr = os.Getenv("DBSERVICEADDR")
+	hostAddr = os.Getenv("HOSTADDR")
+
 	startServer()
 }
 
-type FormStruct struct {
-	Content string
+func panicErr(e error) {
+	if e != nil {
+		panic(e)
+	}
 }
