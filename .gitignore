@@ -1,4 +1,3 @@
-.gitignore
 go.work
 go.work.sum
 ghetto-ci-cd.sh
