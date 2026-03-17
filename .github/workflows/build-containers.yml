@@ -1,4 +1,4 @@
-name: "Shellbin Dev Pipeline"
+name: "Build/push images to GHCR"
 
 permissions:
   contents: read
