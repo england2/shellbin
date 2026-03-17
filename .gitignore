@@ -3,7 +3,13 @@ go.work
 go.work.sum
 ghetto-ci-cd.sh
 build-push-test.sh
-update-images.sh 
+update-images.sh
 *target*
 ignore-folder
 ___*
+
+# ignore binaries
+db-service/src/db-service
+nc-server/src/db-service
+nc-server/src/ncserver
+webserver/src/webserver-frontend
