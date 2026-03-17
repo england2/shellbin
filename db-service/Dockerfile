@@ -1,8 +1,8 @@
 FROM golang:1.19.8
 WORKDIR /
 COPY src/* /
-RUN go mod tidy
-RUN CGO_ENABLED=0 go build -a -installsuffix cgo -o db-service .
+RUN go mod download
+RUN CGO_ENABLED=0 go build -o db-service .
 
 # TODO test alpine
 FROM alpine

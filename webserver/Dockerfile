@@ -1,8 +1,8 @@
 FROM golang:1.19.8
 WORKDIR /build
 COPY src/ ./
-RUN go mod tidy
-RUN CGO_ENABLED=0 go build -a -installsuffix cgo -o webserver .
+RUN go mod download
+RUN CGO_ENABLED=0 go build -o webserver .
 
 FROM alpine
 EXPOSE 4747

@@ -1,8 +1,8 @@
 FROM golang:1.19.8
 WORKDIR /
 COPY src/* /
-RUN go mod tidy
-RUN CGO_ENABLED=0 go build -a -installsuffix cgo -o ncserver .
+RUN go mod download
+RUN CGO_ENABLED=0 go build -o ncserver .
 
 # TODO test alpine
 FROM alpine
