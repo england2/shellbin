@@ -5,6 +5,8 @@ permissions:
   packages: write
 
 on:
+  # blank `workflow_dispatch:` allows for ad-hoc workflow runs via the github web ui
+  workflow_dispatch:
   push:
 
 jobs:
