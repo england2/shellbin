@@ -6,4 +6,4 @@ build-push-test.sh
 update-images.sh 
 *target*
 ignore-folder
-%--*
+___*
