@@ -81,7 +81,7 @@ jobs:
         with:
           repository: ${{ env.CLUSTER_REPO }}
           ref: ${{ env.CLUSTER_REPO_BRANCH }}
-          ssh-key: ${{ secrets.CLUSTER_REPO_DEPLOY_KEY }}
+          token: ${{ secrets.GHCR_PAT }}
           path: cluster-repo
 
       - name: Update image tags
