@@ -5,7 +5,7 @@ metadata:
     app: ncserver
     app.kubernetes.io/managed-by: Helm
   name: ncserver-nodeport
-  namespace: shellbin2
+  namespace: shellbin
 spec:
   clusterIP: 10.43.168.234
   clusterIPs:

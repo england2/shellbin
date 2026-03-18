@@ -5,7 +5,7 @@ metadata:
     app: webserver
     app.kubernetes.io/managed-by: Helm
   name: webserver-nodeport
-  namespace: shellbin2
+  namespace: shellbin
 spec:
   clusterIP: 10.43.168.233
   clusterIPs:
