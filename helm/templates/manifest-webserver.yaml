@@ -30,7 +30,7 @@ spec:
         - name: {{ .Values.webserver.name}}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.global.registryUrl }}/{{ .Values.webserver.image.repository }}:{{ .Values.webserver.image.tag | default "latest" }}"
+          image: "{{ include "shellbin.image" .Values.webserver.image }}"
           imagePullPolicy: {{ .Values.webserver.image.pullPolicy }}
           command: ["sleep"]
           args: ["infinity"]

@@ -6,16 +6,16 @@ global:
   DBADDR: shellbin-mysql.shellbin.svc.cluster.local
   # HARDCODED:
   DBSERVICEADDR: db-service.shellbin.svc.cluster.local
-  registryUrl: "docker-registry:5000"
   imagePullSecret: reg-cred-secret
 
 webserver:
   replicaCount: 1
   name: webserver
   image:
-    repository: webserver
-    pullPolicy: Always
-    tag: ""
+    repository: ghcr.io/england2/shellbin
+    pullPolicy: IfNotPresent
+    tag: webserver-latest
+    digest: ""
 
   service:
     type: ClusterIP
@@ -25,12 +25,10 @@ dbservice:
   replicaCount: 1
   name: db-service
   image:
-    # TODO use template within template to get repo name
-    # TODO where is there an A at the end of this?
-    repository: db-service
-    pullPolicy: Always
-    # Overrides the image tag whose default is the chart appVersion.
-    tag: ""
+    repository: ghcr.io/england2/shellbin
+    pullPolicy: IfNotPresent
+    tag: dbservice-latest
+    digest: ""
 
   resources: {}
   service:
@@ -50,10 +48,10 @@ ncserver:
   replicaCount: 1
   name: ncserver
   image:
-    repository: ncserver
-    pullPolicy: Always
-    # Overrides the image tag whose default is the chart appVersion.
-    tag: ""
+    repository: ghcr.io/england2/shellbin
+    pullPolicy: IfNotPresent
+    tag: ncserver-latest
+    digest: ""
 
   resources: {}
   service:

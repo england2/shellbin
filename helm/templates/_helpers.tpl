@@ -67,3 +67,15 @@ Create the name of the service account to use
 {{- default "default" .Values.ncserver.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Render a container image reference from a full repository plus tag or digest.
+*/}}
+{{- define "shellbin.image" -}}
+{{- $repository := required "image.repository is required" .repository -}}
+{{- if .digest -}}
+{{- printf "%s@%s" $repository .digest -}}
+{{- else -}}
+{{- printf "%s:%s" $repository (default "latest" .tag) -}}
+{{- end -}}
+{{- end }}

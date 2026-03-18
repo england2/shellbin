@@ -30,7 +30,7 @@ spec:
         - name: {{ .Values.dbservice.name}}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.global.registryUrl }}/{{ .Values.dbservice.image.repository }}:{{ .Values.dbservice.image.tag | default "latest" }}"
+          image: "{{ include "shellbin.image" .Values.dbservice.image }}"
           imagePullPolicy: {{ .Values.dbservice.image.pullPolicy }}
           command: ["sleep"]
           args: ["infinity"]
