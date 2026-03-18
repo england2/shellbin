@@ -81,7 +81,7 @@ jobs:
         with:
           repository: ${{ env.CLUSTER_REPO }}
           ref: ${{ env.CLUSTER_REPO_BRANCH }}
-          token: ${{ secrets.GHCR_PAT }}
+          token: ${{ secrets.FINEGRAINED_PAT }}
           path: cluster-repo
 
       - name: Update image tags
