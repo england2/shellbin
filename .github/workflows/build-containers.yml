@@ -74,7 +74,7 @@ jobs:
     env:
       CLUSTER_REPO: england2/cluster-repo
       CLUSTER_REPO_BRANCH: main
-      VALUES_FILE: argocd-reconciled-yaml/applications/shellbin/values-prod.yaml
+      VALUES_FILE: argocd-reconciled-yaml/applications/shellbin/helm-values-shellbin.yml
     steps:
       - name: Checkout cluster-repo
         uses: actions/checkout@v6
