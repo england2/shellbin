@@ -32,10 +32,10 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ include "shellbin.image" .Values.webserver.image }}"
           imagePullPolicy: {{ .Values.webserver.image.pullPolicy }}
-          command: ["sleep"]
-          args: ["infinity"]
-          # command: ["sh"]
-          # args: ["entrypoint.sh"]
+          # command: ["sleep"]
+          # args: ["infinity"]
+          command: ["sh"]
+          args: ["entrypoint.sh"]
           env:
             - name: HOSTADDR
               value: 0.0.0.0:{{ .Values.webserver.service.port  }}
