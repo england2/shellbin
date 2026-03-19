@@ -1,0 +1,13 @@
+{{- if .Values.database.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.database.name }}
+spec:
+  selector:
+    app: {{ .Values.database.name }}
+  ports:
+    - name: mysql
+      port: 3306
+      targetPort: 3306
+{{- end }}

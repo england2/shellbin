@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: webserver
+    app.kubernetes.io/managed-by: Helm
+  name: webserver-nodeport
+  namespace: shellbin
+spec:
+  clusterIP: 10.43.168.233
+  clusterIPs:
+    - 10.43.168.233
+  externalTrafficPolicy: Cluster
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+    - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+    - nodePort: 31347
+      port: 5656
+      protocol: TCP
+      targetPort: 5656
+  selector:
+    app: webserver
+  sessionAffinity: None
+  type: NodePort
+status:
+  loadBalancer: {}

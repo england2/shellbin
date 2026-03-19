@@ -1,0 +1,2 @@
+-- Optional bootstrap data for local development.
+-- Intentionally empty.
