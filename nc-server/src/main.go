@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
@@ -79,18 +78,23 @@ func addContentDb(content string) (string, error) {
 
 	resp, err := http.Post("http://"+dbserviceAddr+"/processInput",
 		"application/json", bytes.NewBuffer(json_data))
-	panicErr(err)
+	if err != nil {
+		return "", err
+	}
 
 	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("db-service returned status %d", resp.StatusCode)
+	}
 
 	var jsonResp PasteJson
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	panicErr(err)
 	json.Unmarshal(body, &jsonResp)
 
 	fmt.Println(jsonResp)
 
-	return jsonResp.Content, nil
+	return jsonResp.Hash, nil
 }
 
 func panicErr(e error) {

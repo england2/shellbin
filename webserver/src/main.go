@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/fs"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -18,15 +18,20 @@ import (
 var fullAssets embed.FS
 
 // helper
-func unmarshalPaste(resp http.Response) Paste {
-
+func unmarshalPaste(resp *http.Response) (Paste, error) {
 	var jsonResp Paste
-	body, err := ioutil.ReadAll(resp.Body)
-	panicErr(err)
-	json.Unmarshal(body, &jsonResp)
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return jsonResp, err
+	}
+	if err := json.Unmarshal(body, &jsonResp); err != nil {
+		return jsonResp, err
+	}
 
 	fmt.Println(jsonResp)
-	return jsonResp
+	return jsonResp, nil
 }
 
 func routePaste(c *gin.Context) {
@@ -37,15 +42,20 @@ func routePaste(c *gin.Context) {
 
 	resp := getContentDb(path)
 
-	if resp.Status == "200" {
-
-		paste := unmarshalPaste(*resp)
+	if resp.StatusCode == http.StatusOK {
+		paste, err := unmarshalPaste(resp)
+		if err != nil {
+			c.Status(http.StatusBadGateway)
+			return
+		}
 
 		c.HTML(http.StatusOK, "paste.html", gin.H{
 			"content": paste.Content,
 		})
-	} else if resp.Status == "404" {
+	} else if resp.StatusCode == http.StatusNotFound {
 		c.HTML(http.StatusOK, "paste.html", "")
+	} else {
+		c.Status(http.StatusBadGateway)
 	}
 
 }
@@ -61,10 +71,17 @@ func handleSubmit(c *gin.Context) {
 
 	resp := addContentDb(content)
 
-	if resp.Status == "200" {
-		c.Redirect(302, "/paste/"+content)
-	} else if resp.Status == "504" {
+	if resp.StatusCode == http.StatusOK {
+		paste, err := unmarshalPaste(resp)
+		if err != nil {
+			c.HTML(http.StatusBadRequest, "erorr.html", "")
+			return
+		}
+		c.Redirect(http.StatusFound, "/paste/"+paste.Hash)
+	} else if resp.StatusCode == http.StatusGatewayTimeout {
 		fmt.Println("db service down")
+		c.HTML(http.StatusBadRequest, "erorr.html", "")
+	} else {
 		c.HTML(http.StatusBadRequest, "erorr.html", "")
 	}
 }
@@ -80,11 +97,10 @@ func addContentDb(content string) *http.Response {
 
 	if err != nil {
 		return &http.Response{
-			Status: "504",
+			Status:     "504 Gateway Timeout",
+			StatusCode: http.StatusGatewayTimeout,
 		}
 	}
-
-	defer resp.Body.Close()
 
 	return resp
 
@@ -98,10 +114,12 @@ func getContentDb(hash string) *http.Response {
 
 	resp, err := http.Post("http://"+dbserviceAddr+"/servePaste",
 		"application/json", bytes.NewBuffer(json_data))
-	// TODO recover from this error, reoute to page 404
-	panicErr(err)
-
-	defer resp.Body.Close()
+	if err != nil {
+		return &http.Response{
+			Status:     "504 Gateway Timeout",
+			StatusCode: http.StatusGatewayTimeout,
+		}
+	}
 
 	return resp
 }
