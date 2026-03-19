@@ -18,8 +18,6 @@ spec:
         - name: mysql
           image: "{{ include "shellbin.image" .Values.database.image }}"
           imagePullPolicy: {{ .Values.database.image.pullPolicy }}
-          args:
-            - --default-authentication-plugin=mysql_native_password
           env:
             - name: MYSQL_ROOT_PASSWORD
               valueFrom:
