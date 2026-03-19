@@ -4,25 +4,23 @@
 
 <html>
 
-<body class="body1">
-    <!-- <div class="aside1" style="background-color: rgb(0, 37, 46);"> -->
+    <body class="body1">
+        <!-- <div class="aside1" style="background-color: rgb(0, 37, 46);"> -->
 
+        <div style="padding: 0 1.6% -0% 1.6%">
+            <form action="/submit" method="post" name="loginForm">
+                <div style="padding: 1.7% 1%">
+                    <textarea class="textarea1" type="text"
+                        placeholder="Write your paste here, or run `cat paste.txt | nc 127.0.0.1 7` "
+                        name="content"></textarea>
+                </div>
 
-    <div style="padding: 0 1.6% -0% 1.6%">
-        <form action="/submit" method="post" name="loginForm">
-            <div style="padding: 1.7% 1%">
-                <textarea class="textarea1" type="text"
-                    placeholder="Write your paste here, or run `cat paste.txt | nc 127.0.0.1 7` "
-                    name="content"></textarea>
-            </div>
-
-            <div style="display: flex; justify-content: center; ">
-                <input type="submit" class="submitbutton"></input>
+                <div style="display: flex; justify-content: center; ">
+                    <input type="submit" class="submitbutton"></input>
             </div>
         </form>
         <br>
     </div>
-
 
     <div style="padding: 0% 00% ;display: flex; justify-content: center; ">
 
@@ -36,17 +34,14 @@ command output using Ncat.
         examples:
         cat main.go | nc SERVERADDR
         ls -lah | nc SERVERADDR
-        echo $PATH | nc SERVERADDR
+        echo $file | nc SERVERADDR
         </pre>
     </div>
-
 
     <div style="padding: 0% 00% ;display: flex; justify-content: center; ">
         <p class="p1">
             Please read the project writeup for more details.
         </p>
     </div>
-
-
 
 </body>
