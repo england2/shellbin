@@ -40,7 +40,7 @@ spec:
             - name: HOSTADDR
               value: 0.0.0.0:{{ .Values.webserver.service.port  }}
             - name: DBSERVICEADDR
-              value: {{ .Values.global.DBSERVICEADDR }}
+              value: {{ .Values.dbservice.name | quote }}
           ports:
             - name: internal-port
               containerPort: {{ .Values.webserver.service.port }}

@@ -40,7 +40,7 @@ spec:
             - name: DATABASE_NAME
               value: {{ .Values.global.databaseName | quote }}
             - name: DBADDR
-              value: {{ .Values.global.DBADDR }}
+              value: {{ default (printf "%s:3306" .Values.database.name) .Values.database.host | quote }}
             - name: DBUSER
               value: {{ .Values.global.DBUSER }}
             - name: DBPASS

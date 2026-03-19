@@ -1,11 +1,7 @@
 global:
-  databaseName: mysql
+  databaseName: shellbin
   DBUSER: weak
   DBPASS: drainage
-  # HARDCODED
-  DBADDR: shellbin-mysql.shellbin.svc.cluster.local
-  # HARDCODED:
-  DBSERVICEADDR: db-service.shellbin.svc.cluster.local
   imagePullSecret: reg-cred-secret
 
 webserver:
@@ -66,6 +62,20 @@ ncserver:
     # The name of the service account to use.
     # If not set and create is true, a name is generated using the fullname template
     name: ""
+
+database:
+  enabled: true
+  name: shellbin-mysql
+  host: ""
+  image:
+    repository: mysql
+    pullPolicy: IfNotPresent
+    tag: "8.4.8"
+    digest: ""
+  auth:
+    rootPassword: root
+  persistence:
+    size: 5Gi
 
 imagePullSecrets: [regcred]
 nameOverride: ""
