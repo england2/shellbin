@@ -1,5 +1,5 @@
-CREATE DATABASE IF NOT EXISTS shellbin;
-USE shellbin;
+CREATE DATABASE IF NOT EXISTS {{ .Values.global.databaseName }};
+USE {{ .Values.global.databaseName }};
 
 CREATE TABLE IF NOT EXISTS pastes (
   hash VARCHAR(8) NOT NULL PRIMARY KEY,

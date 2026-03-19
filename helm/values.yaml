@@ -75,7 +75,12 @@ database:
   auth:
     rootPassword: root
   persistence:
+    enabled: true
+    accessModes:
+      - ReadWriteOnce
     size: 5Gi
+    storageClassName: ""
+    annotations: {}
 
 developmentTesting:
   # if enabled will create nodeports into each microservice

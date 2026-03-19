@@ -5,7 +5,7 @@ metadata:
   name: {{ .Values.database.name }}-initdb
 data:
   schema.sql: |
-{{ .Files.Get "database/schema.sql" | indent 4 }}
+{{ tpl (.Files.Get "database/schema.sql") . | indent 4 }}
   seed.sql: |
-{{ .Files.Get "database/seed.sql" | indent 4 }}
+{{ tpl (.Files.Get "database/seed.sql") . | indent 4 }}
 {{- end }}

@@ -52,6 +52,14 @@ spec:
                 - mysqladmin ping -h 127.0.0.1 -uroot -p"$MYSQL_ROOT_PASSWORD"
             initialDelaySeconds: 10
             periodSeconds: 10
+          startupProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - mysqladmin ping -h 127.0.0.1 -uroot -p"$MYSQL_ROOT_PASSWORD"
+            failureThreshold: 30
+            periodSeconds: 10
           livenessProbe:
             exec:
               command:
@@ -61,21 +69,35 @@ spec:
             initialDelaySeconds: 30
             periodSeconds: 20
           volumeMounts:
-            - name: data
+            - name: mysql-data
               mountPath: /var/lib/mysql
             - name: initdb
               mountPath: /docker-entrypoint-initdb.d
+              readOnly: true
       volumes:
+{{- if not .Values.database.persistence.enabled }}
+        - name: mysql-data
+          emptyDir: {}
+{{- end }}
         - name: initdb
           configMap:
             name: {{ .Values.database.name }}-initdb
+{{- if .Values.database.persistence.enabled }}
   volumeClaimTemplates:
     - metadata:
-        name: data
+        name: mysql-data
+{{- with .Values.database.persistence.annotations }}
+        annotations:
+{{ toYaml . | indent 10 }}
+{{- end }}
       spec:
         accessModes:
-          - ReadWriteOnce
+{{ toYaml .Values.database.persistence.accessModes | indent 10 }}
+{{- if .Values.database.persistence.storageClassName }}
+        storageClassName: {{ .Values.database.persistence.storageClassName | quote }}
+{{- end }}
         resources:
           requests:
             storage: {{ .Values.database.persistence.size }}
+{{- end }}
 {{- end }}
