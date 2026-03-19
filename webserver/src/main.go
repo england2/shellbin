@@ -5,8 +5,8 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	"io/fs"
 	"io"
+	"io/fs"
 	"log"
 	"net/http"
 	"os"
@@ -36,6 +36,7 @@ func unmarshalPaste(resp *http.Response) (Paste, error) {
 
 func routePaste(c *gin.Context) {
 
+	fmt.Println("simple trivial change")
 	fmt.Println("in routePaste")
 
 	path := c.Param("path")
