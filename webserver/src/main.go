@@ -45,7 +45,7 @@ func routePaste(c *gin.Context) {
 	if resp.StatusCode == http.StatusOK {
 		paste, err := unmarshalPaste(resp)
 		if err != nil {
-			c.Status(http.StatusBadGateway)
+			c.HTML(http.StatusBadGateway, "error.html", "")
 			return
 		}
 
@@ -53,9 +53,9 @@ func routePaste(c *gin.Context) {
 			"content": paste.Content,
 		})
 	} else if resp.StatusCode == http.StatusNotFound {
-		c.HTML(http.StatusOK, "paste.html", "")
+		c.HTML(http.StatusNotFound, "error.html", "")
 	} else {
-		c.Status(http.StatusBadGateway)
+		c.HTML(http.StatusBadGateway, "error.html", "")
 	}
 
 }
@@ -74,15 +74,15 @@ func handleSubmit(c *gin.Context) {
 	if resp.StatusCode == http.StatusOK {
 		paste, err := unmarshalPaste(resp)
 		if err != nil {
-			c.HTML(http.StatusBadRequest, "erorr.html", "")
+			c.HTML(http.StatusBadRequest, "error.html", "")
 			return
 		}
-		c.Redirect(http.StatusFound, "/paste/"+paste.Hash)
+		c.Redirect(http.StatusFound, "/"+paste.Hash)
 	} else if resp.StatusCode == http.StatusGatewayTimeout {
 		fmt.Println("db service down")
-		c.HTML(http.StatusBadRequest, "erorr.html", "")
+		c.HTML(http.StatusBadRequest, "error.html", "")
 	} else {
-		c.HTML(http.StatusBadRequest, "erorr.html", "")
+		c.HTML(http.StatusBadRequest, "error.html", "")
 	}
 }
 
@@ -145,9 +145,11 @@ func startServer() {
 	router.StaticFS("/assets", http.FS(assets))
 
 	g1 := router.Group("/")
-	g1.GET("/paste/:path", routePaste)
-
 	g1.GET("/", routeIndex)
+	g1.GET("/:path", routePaste)
+	g1.GET("/paste/:path", func(c *gin.Context) {
+		c.Redirect(http.StatusMovedPermanently, "/"+c.Param("path"))
+	})
 
 	router.POST("/submit", handleSubmit)
 
