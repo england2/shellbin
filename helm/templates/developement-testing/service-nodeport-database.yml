@@ -1,0 +1,21 @@
+{{- if and .Values.developmentTesting.enabled .Values.database.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: {{ .Values.database.name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  name: {{ .Values.database.name }}-nodeport
+spec:
+  externalTrafficPolicy: Cluster
+  internalTrafficPolicy: Cluster
+  ports:
+    - nodePort: {{ .Values.developmentTesting.nodePorts.database }}
+      port: 3306
+      protocol: TCP
+      targetPort: 3306
+  selector:
+    app: {{ .Values.database.name }}
+  sessionAffinity: None
+  type: NodePort
+{{- end }}

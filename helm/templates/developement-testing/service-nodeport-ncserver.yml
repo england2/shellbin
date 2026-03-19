@@ -1,0 +1,21 @@
+{{- if .Values.developmentTesting.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: {{ .Values.ncserver.name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  name: {{ .Values.ncserver.name }}-nodeport
+spec:
+  externalTrafficPolicy: Cluster
+  internalTrafficPolicy: Cluster
+  ports:
+    - nodePort: {{ .Values.developmentTesting.nodePorts.ncserver }}
+      port: 6262
+      protocol: TCP
+      targetPort: 6262
+  selector:
+    app: {{ .Values.ncserver.name }}
+  sessionAffinity: None
+  type: NodePort
+{{- end }}

@@ -1,0 +1,21 @@
+{{- if .Values.developmentTesting.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: {{ .Values.webserver.name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  name: {{ .Values.webserver.name }}-nodeport
+spec:
+  externalTrafficPolicy: Cluster
+  internalTrafficPolicy: Cluster
+  ports:
+    - nodePort: {{ .Values.developmentTesting.nodePorts.webserver }}
+      port: {{ .Values.webserver.service.port }}
+      protocol: TCP
+      targetPort: {{ .Values.webserver.service.port }}
+  selector:
+    app: {{ .Values.webserver.name }}
+  sessionAffinity: None
+  type: NodePort
+{{- end }}

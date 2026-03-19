@@ -77,6 +77,15 @@ database:
   persistence:
     size: 5Gi
 
+developmentTesting:
+  # if enabled will create nodeports into each microservice
+  enabled: true
+  nodePorts:
+    database: 31330
+    dbservice: 31331
+    ncserver: 31332
+    webserver: 31333
+
 imagePullSecrets: [regcred]
 nameOverride: ""
 fullnameOverride: ""
