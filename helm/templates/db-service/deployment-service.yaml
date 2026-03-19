@@ -37,6 +37,8 @@ spec:
           command: ["sh"]
           args: ["entrypoint.sh"]
           env:
+            - name: DATABASE_NAME
+              value: {{ .Values.global.databaseName | quote }}
             - name: DBADDR
               value: {{ .Values.global.DBADDR }}
             - name: DBUSER

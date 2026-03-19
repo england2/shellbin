@@ -30,10 +30,17 @@ func tryGetEnv(key string) string {
 	return val
 }
 
+func getEnvOrDefault(key string, fallback string) string {
+	if val, ok := os.LookupEnv(key); ok {
+		return val
+	}
+	return fallback
+}
+
 func setupDb() {
 
 	cfg := mysql.Config{
-		DBName:               "shellbin",
+		DBName:               getEnvOrDefault("DATABASE_NAME", "shellbin"),
 		Net:                  "tcp",
 		Addr:                 tryGetEnv("DBADDR"),
 		User:                 tryGetEnv("DBUSER"),
