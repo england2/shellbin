@@ -36,6 +36,8 @@ spec:
           command: ["sh"]
           args: ["entrypoint.sh"]
           env:
+            - name: PUBLIC_SERVER_ADDER
+              value: {{ .Values.global.PUBLIC_SERVER_ADDER | quote }}
             - name: DBSERVICEADDR
               value: {{ .Values.dbservice.name | quote }}
           ports:

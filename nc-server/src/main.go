@@ -12,10 +12,12 @@ import (
 )
 
 var dbserviceAddr string
+var publicServerAdder string
 
 func main() {
 
 	dbserviceAddr = os.Getenv("DBSERVICEADDR")
+	publicServerAdder = os.Getenv("PUBLIC_SERVER_ADDER")
 	url := "0.0.0.0:6262"
 
 	var listener net.Listener
@@ -64,7 +66,7 @@ func processClient(conn net.Conn) {
 
 	hash, err := addContentDb(content)
 	if err == nil {
-		conn.Write([]byte(fmt.Sprintf("paste.cat-z.xyz/%v\n", hash)))
+		conn.Write([]byte(fmt.Sprintf("%s/%v\n", publicServerAdder, hash)))
 	} else {
 		conn.Write([]byte("internal error\n"))
 	}

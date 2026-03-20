@@ -39,6 +39,8 @@ spec:
           env:
             - name: HOSTADDR
               value: 0.0.0.0:{{ .Values.webserver.service.port  }}
+            - name: PUBLIC_SERVER_ADDER
+              value: {{ .Values.global.PUBLIC_SERVER_ADDER | quote }}
             - name: DBSERVICEADDR
               value: {{ .Values.dbservice.name | quote }}
           ports:

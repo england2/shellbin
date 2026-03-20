@@ -32,9 +32,9 @@ command output using netcet.
         </pre>
         <pre style="color: #6a7676b2;">
         examples:
-        cat main.go | nc SERVERADDR
-        ls -lah | nc SERVERADDR
-        echo $file | nc SERVERADDR
+        cat main.go | nc {{.publicServerAdder}}
+        ls -lah | nc {{.publicServerAdder}}
+        echo $file | nc {{.publicServerAdder}}
         </pre>
     </div>
 

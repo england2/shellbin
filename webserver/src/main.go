@@ -36,7 +36,6 @@ func unmarshalPaste(resp *http.Response) (Paste, error) {
 
 func routePaste(c *gin.Context) {
 
-	fmt.Println("simple trivial change")
 	fmt.Println("in routePaste")
 
 	path := c.Param("path")
@@ -62,7 +61,9 @@ func routePaste(c *gin.Context) {
 }
 
 func routeIndex(c *gin.Context) {
-	c.HTML(http.StatusOK, "index.html", "")
+	c.HTML(http.StatusOK, "index.html", gin.H{
+		"publicServerAdder": publicServerAdder,
+	})
 }
 
 func handleSubmit(c *gin.Context) {
@@ -160,10 +161,12 @@ func startServer() {
 
 var dbserviceAddr string
 var hostAddr string
+var publicServerAdder string
 
 func main() {
 	dbserviceAddr = os.Getenv("DBSERVICEADDR")
 	hostAddr = os.Getenv("HOSTADDR")
+	publicServerAdder = os.Getenv("PUBLIC_SERVER_ADDER")
 
 	startServer()
 }
