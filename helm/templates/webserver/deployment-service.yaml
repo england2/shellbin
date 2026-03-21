@@ -4,7 +4,6 @@ metadata:
   name: {{ .Values.webserver.name }}
   labels:
     app: {{ .Values.webserver.name }}
-    date: "{{ now | unixEpoch }}"
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.webserver.replicaCount }}

@@ -4,7 +4,6 @@ metadata:
   name: {{ .Values.dbservice.name }}
   labels:
     app: {{ .Values.dbservice.name }}
-    date: "{{ now | unixEpoch }}"
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.dbservice.replicaCount }}
