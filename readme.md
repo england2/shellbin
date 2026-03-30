@@ -1,14 +1,15 @@
-## Project Explanation
+## Introduction
 
 Shellbin is a microservice architecture project that I built to exercise my understanding of CI/CD for cloud-native applications.
 
-It's named shellbin because it's a pastebin clone that you can access with your shell using Unix pipes and the `netcat` utility.
+It's named shellbin because it's a pastebin clone that you can access with your shell using Unix pipes and the `netcat` utility (in addition to a web-frontend).
 
+CLI example:
 ```fish
 cat $FILE | nc <address> <port>
 ```
 
-Users can also create pastes using a web front-end written in Go that uses server-side rendering.
+## Microservice Structure
 
 ```mermaid
 flowchart LR
@@ -35,6 +36,8 @@ flowchart LR
 ```
 
 In total, there are 4 discrete container images involved in this project: A web server, a database service, a netcat-receiving-server, and the MySQL database container.
+
+## CI/CD Explanation
 
 As mentioned, the main goal of this project was to experiment with a development pipeline for these microservices.
 
