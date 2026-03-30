@@ -1,3 +1,5 @@
+## Project Explanation
+
 Shellbin is a microservice architecture project that I built to exercise my understanding of CI/CD for cloud-native applications.
 
 It's named shellbin because it's a pastebin clone that you can access with your shell using Unix pipes and the `netcat` utility.
@@ -48,4 +50,3 @@ The CI/CD pipeline ends up being pretty simple:
 - And then ArgoCD picks up changes and the cluster deploys updates to the container images and Helm Chart
 
 Read the [full Shellbin write-up here](https://etengland.me/shellbin) for more details.
-
