@@ -17,8 +17,8 @@
 }
 
 ::selection {
-  color: #f3d6d8;
-  background: #5a1a22ca;
+  color: #bdcccc;
+  background: #165a54ca;
 }
 
 :root {
@@ -26,27 +26,27 @@
 }
 
 body {
-  color: #c9a9ac;
+  color: #93a1a1;
 }
 
 .submitbutton {
   font-family: "Ubuntu Mono";
-  background: rgb(49, 13, 19);
+  background: rgb(0, 43, 54);
   border: 0.001em;
-  color: #c9a9ac;
+  color: #93a1a1;
   border: 0.001rem solid;
-  border-color: #8a5b624d;
+  border-color: #657b8346;
   border-radius: 0em;
-  box-shadow: 0.2em 0.2em 0em rgba(20, 4, 8, 0.55);
+  box-shadow: 0.2em 0.2em 0em rgba(0, 24, 30, 0.506);
 }
 
 .p1 {
   font-family: Ubuntu;
-  color: #98767ab2;
+  color: #6a7676b2;
 }
 
 .body1 {
-  background-color: rgb(31, 8, 13);
+  background-color: rgb(0, 37, 46);
   display: flexbox;
   height: 300px; /* Or whatever */
 }
@@ -59,7 +59,7 @@ body {
 
 .aside1 {
   word-wrap: break-word;
-  background: rgb(49, 13, 19);
+  background: rgb(0, 43, 54);
   margin: 2% auto;
 
   /* top | right | bottom | left */
@@ -67,36 +67,36 @@ body {
   padding: 0em;
   width: 93%;
   border: 0.001rem solid;
-  border-color: #8a5b624d;
+  border-color: #657b8346;
   border-radius: 0em;
-  box-shadow: 0.2em 0.2em 0em rgba(20, 4, 8, 0.55);
+  box-shadow: 0.2em 0.2em 0em rgba(0, 24, 30, 0.506);
 }
 
 .pasteInput {
-  background-color: rgb(31, 8, 13);
+  background-color: rgb(0, 37, 46);
 }
 
 .textarea1 {
-  color: #98767a;
+  color: #6a7676;
   width: 100%;
   height: 100%;
   border: 0.001rem solid;
-  border-color: #8a5b624d;
+  border-color: #657b8346;
   border-radius: 0em;
-  box-shadow: 0.2em 0.2em 0em rgba(20, 4, 8, 0.55);
-  background: rgb(49, 13, 19);
+  box-shadow: 0.2em 0.2em 0em rgba(0, 24, 30, 0.506);
+  background: rgb(0, 43, 54);
   resize: none;
 }
 
 .textarea1:focus {
   outline: none !important;
-  color: #c9a9ac;
+  color: #93a1a1;
   border: 0.001rem solid;
-  border-color: #a8757d73;
+  border-color: #657b8370;
   border-radius: 0em;
-  box-shadow: 0.2em 0.2em 0em rgba(20, 4, 8, 0.78);
+  box-shadow: 0.2em 0.2em 0em rgba(0, 24, 30, 0.734);
 }
 
 textarea::placeholder {
-  color: #98767a;
+  color: #6a7676;
 }
