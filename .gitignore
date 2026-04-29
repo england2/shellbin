@@ -5,10 +5,13 @@ build-push-test.sh
 update-images.sh
 *target*
 ignore-folder
-___*
+ignore.*
 
 # ignore binaries
 db-service/src/db-service
 nc-server/src/db-service
 nc-server/src/ncserver
 webserver/src/webserver-frontend
+
+# ignore ai
+.codex
